@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/blog.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog.github.io/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ROS,ubuntu,raspberry,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/blog.github.io/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="这是一个将姿态传感器数据发布到ROS话题上教程，姿态传感器数据通信格式为UART，数据包括航向角的四元素、角加速度、线加速度">
+<meta name="keywords" content="ROS,ubuntu,raspberry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROS开发（二）——添加传感器话题(姿态传感器)">
+<meta property="og:url" content="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-2/index.html">
+<meta property="og:site_name" content="13号下午茶">
+<meta property="og:description" content="这是一个将姿态传感器数据发布到ROS话题上教程，姿态传感器数据通信格式为UART，数据包括航向角的四元素、角加速度、线加速度">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-11T12:39:27.706Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ROS开发（二）——添加传感器话题(姿态传感器)">
+<meta name="twitter:description" content="这是一个将姿态传感器数据发布到ROS话题上教程，姿态传感器数据通信格式为UART，数据包括航向角的四元素、角加速度、线加速度">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog.github.io/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-2/">
+
+
+
+
+
+  <title>ROS开发（二）——添加传感器话题(姿态传感器) | 13号下午茶</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog.github.io/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">13号下午茶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">记录研究生学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog.github.io/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shisanchuan.github.io/blog.github.io/blog.github.io/2018/11/11/ROS-robot-2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShiSanChuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="13号下午茶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ROS开发（二）——添加传感器话题(姿态传感器)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-11T14:09:13+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一个将姿态传感器数据发布到ROS话题上教程，姿态传感器数据通信格式为UART，数据包括航向角的四元素、角加速度、线加速度</p>
+<a id="more"></a>
+<h2 id="MINI-SRC姿态传感器-UART"><a href="#MINI-SRC姿态传感器-UART" class="headerlink" title="MINI SRC姿态传感器(UART)"></a>MINI SRC姿态传感器(UART)</h2><h3 id="1-传感器数据协议"><a href="#1-传感器数据协议" class="headerlink" title="1. 传感器数据协议"></a>1. 传感器数据协议</h3><table>
+<thead>
+<tr>
+<th>起始帧</th>
+<th>本帧字节数</th>
+<th>帧功能</th>
+<th>航向角/加速度</th>
+<th>解算速度/磁力计</th>
+<th>帧校验</th>
+<th>帧结束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0XA5 0x5A</td>
+<td>0x10</td>
+<td>0xA1</td>
+<td>0xXX 0xXX</td>
+<td>0xXX 0xXX</td>
+<td>0xXX</td>
+<td>0xAA</td>
+</tr>
+<tr>
+<td>0xA5  0x5A</td>
+<td>0x16</td>
+<td>0xA2</td>
+<td>0xXX 0xXX</td>
+<td>0xXX  0xXX</td>
+<td>0xXX</td>
+<td>0xAA</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>0xXX 先为数据高位，紧接着是低位</li>
+<li>数据包括航向角、角加速度、线加速度</li>
+<li>航向角的单位为0.1度，即乘以0.1后为数据的角度度数；角加速度、线加速度为ADC测量值，分别对应量程换算（角加速度<em>(2000/65536)、线加速度</em>(4.2*9.81/65536)）</li>
+</ul>
+<h3 id="2-编写发布话题数据包"><a href="#2-编写发布话题数据包" class="headerlink" title="2.    编写发布话题数据包"></a>2.    编写发布话题数据包</h3><h4 id="2-1安装额外ROS依赖包（见一）"><a href="#2-1安装额外ROS依赖包（见一）" class="headerlink" title="2.1安装额外ROS依赖包（见一）"></a>2.1安装额外ROS依赖包（见一）</h4><ul>
+<li><p>sudo apt-get install ros-kinetic-rosserial</p>
+<h4 id="2-2ubuntu创建ROS包"><a href="#2-2ubuntu创建ROS包" class="headerlink" title="2.2ubuntu创建ROS包"></a>2.2ubuntu创建ROS包</h4><p>uart_read为包名称，后面为依赖项，由于姿态传感器非常适合sensor_msgs/Imu数据结构所以使用</p>
+</li>
+<li><p>roscreate-pkg uart_read roscpp</p>
+<h4 id="2-3编写CMakeLists-txt"><a href="#2-3编写CMakeLists-txt" class="headerlink" title="2.3编写CMakeLists.txt"></a>2.3编写CMakeLists.txt</h4><p>安装生成的CMakeLists.txt修改</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">2.8</span>.<span class="number">3</span>)</span><br><span class="line"><span class="keyword">project</span>(uart_read)</span><br><span class="line"><span class="keyword">add_compile_options</span>(-std=c++<span class="number">11</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>(catkin REQUIRED COMPONENTS</span><br><span class="line">  roscpp</span><br><span class="line">  serial</span><br><span class="line">  std_msgs</span><br><span class="line">  sensor_msgs</span><br><span class="line">  tf</span><br><span class="line">  geometry_msgs</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">catkin_package(</span><br><span class="line"><span class="comment">#  INCLUDE_DIRS include</span></span><br><span class="line"><span class="comment">#  LIBRARIES uart_read</span></span><br><span class="line"> CATKIN_DEPENDS serial std_msgs sensor_msgs geometry_msgs tf roscpp</span><br><span class="line"><span class="comment">#  DEPENDS system_lib</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># include</span></span><br><span class="line">  <span class="variable">$&#123;catkin_INCLUDE_DIRS&#125;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node src/uart_read.cpp)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="2-4修改package-xml"><a href="#2-4修改package-xml" class="headerlink" title="2.4修改package.xml"></a>2.4修改package.xml</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span> <span class="comment">&lt;!-- 删除　version=2.0因为版本问题 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">package</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>uart_read<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span>The uart_read package<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">maintainer</span> <span class="attr">email</span>=<span class="string">"shisanchuan@todo.todo"</span>&gt;</span>shisanchuan<span class="tag">&lt;/<span class="name">maintainer</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">license</span>&gt;</span>TODO<span class="tag">&lt;/<span class="name">license</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">buildtool_depend</span>&gt;</span>catkin<span class="tag">&lt;/<span class="name">buildtool_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>serial<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>tf<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>geometry_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>serial<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>geometry_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>imu_tools<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>tf<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- The export tag contains other, unspecified, tags --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">export</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Other tools can request additional information be placed here --&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">export</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-5编写文件src-uart-read-cpp（原生成-cpp文件修改名称得到）"><a href="#2-5编写文件src-uart-read-cpp（原生成-cpp文件修改名称得到）" class="headerlink" title="2.5编写文件src/uart_read.cpp（原生成.cpp文件修改名称得到）"></a>2.5编写文件src/uart_read.cpp（原生成.cpp文件修改名称得到）</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;serial/serial.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;std_msgs/String.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;std_msgs/Empty.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sensor_msgs/Imu.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tf/transform_broadcaster.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tf/transform_datatypes.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;geometry_msgs/Quaternion.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ros/ros.h&gt;</span></span></span><br><span class="line">serial::Serial ros_ser;</span><br><span class="line"></span><br><span class="line"><span class="comment">//回调函数</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">callback</span><span class="params">(<span class="keyword">const</span> std_msgs::String::ConstPtr&amp; msg)</span></span>&#123;</span><br><span class="line">     ROS_INFO_STREAM(<span class="string">"Write to serial port"</span> &lt;&lt; msg-&gt;data);</span><br><span class="line">     ros_ser.write(msg-&gt;data);</span><br><span class="line"> &#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span></span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> port;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> NodeHandle_name;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> pub_name;</span><br><span class="line"></span><br><span class="line">     ros::init(argc, argv, <span class="string">"my_serial_node"</span>);</span><br><span class="line">     ros::<span class="function">NodeHandle <span class="title">private_node_handle</span><span class="params">(<span class="string">"~"</span>)</span></span>;</span><br><span class="line">     private_node_handle.param&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"port"</span>, port, <span class="string">"/dev/ttyUSB0"</span>);</span><br><span class="line">     private_node_handle.param&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"NodeHandle_name"</span>, NodeHandle_name, <span class="string">"imu"</span>);</span><br><span class="line">     private_node_handle.param&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"pub_name"</span>, pub_name, <span class="string">"data"</span>);</span><br><span class="line"></span><br><span class="line">     ros::<span class="function">NodeHandle <span class="title">n</span><span class="params">(NodeHandle_name)</span></span>;</span><br><span class="line">     <span class="comment">//订阅主题command</span></span><br><span class="line">     ros::Subscriber command_sub = n.subscribe(<span class="string">"command"</span>, <span class="number">1000</span>, callback);</span><br><span class="line">     <span class="comment">//发布主题sensor</span></span><br><span class="line">     ros::Publisher IMU_pub=n.advertise&lt;sensor_msgs::Imu&gt;(pub_name, <span class="number">50</span>);</span><br><span class="line">    </span><br><span class="line">    tf::Quaternion orientation;</span><br><span class="line">    tf::Quaternion zero_orientation=tf::createQuaternionFromRPY(<span class="number">0.0</span>,<span class="number">0.0</span>,<span class="number">0.0</span>);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">static</span> tf::TransformBroadcaster tf_br;</span><br><span class="line">     tf::Transform transform;</span><br><span class="line">     transform.setOrigin(tf::Vector3(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>));</span><br><span class="line">backpoint:</span><br><span class="line">     <span class="keyword">try</span></span><br><span class="line">     &#123;</span><br><span class="line">         ros_ser.setPort(port);</span><br><span class="line">         ros_ser.setBaudrate(<span class="number">115200</span>);</span><br><span class="line">         ros_ser.open();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">catch</span> (serial::IOException&amp; e)</span><br><span class="line">     &#123;</span><br><span class="line">         ROS_ERROR_STREAM(<span class="string">"Unable to open port "</span>);</span><br><span class="line">         <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">if</span>(ros_ser.isOpen())&#123;</span><br><span class="line">         ROS_INFO_STREAM(<span class="string">"Serial Port opened"</span>);</span><br><span class="line">     &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     ros::<span class="function">Rate <span class="title">loop_rate</span><span class="params">(<span class="number">10</span>)</span></span>;</span><br><span class="line">     sensor_msgs::Imu imu;</span><br><span class="line">     <span class="built_in">std</span>::<span class="built_in">string</span> read,input;</span><br><span class="line">     <span class="keyword">int</span> start_flag;</span><br><span class="line">     <span class="keyword">while</span>(ros::ok())&#123;</span><br><span class="line">         ros::spinOnce();</span><br><span class="line">         <span class="keyword">if</span>(ros_ser.available())&#123;</span><br><span class="line">             <span class="comment">// std_msgs::String serial_data;</span></span><br><span class="line">             <span class="comment">//获取串口数据</span></span><br><span class="line">             <span class="keyword">try</span>&#123;</span><br><span class="line">             read = ros_ser.read(ros_ser.available());</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="keyword">catch</span> (serial::IOException&amp; e)&#123;</span><br><span class="line">                ROS_ERROR_STREAM(<span class="string">"Error reading from the serial port "</span> &lt;&lt; ser.getPort() &lt;&lt; <span class="string">". Closing connection."</span>);</span><br><span class="line">                ros::Duration(<span class="number">5</span>).sleep();</span><br><span class="line">                <span class="keyword">goto</span> backpoint;<span class="comment">//串口不稳定的话，休眠５秒后在次重新尝试连接</span></span><br><span class="line">            	&#125;</span><br><span class="line">             <span class="comment">// ROS_DEBUG("Read size:" &lt;&lt; read.size());</span></span><br><span class="line">             input+=read;</span><br><span class="line">             <span class="keyword">while</span>(input.length()&gt;=<span class="number">44</span>)&#123;<span class="comment">//总长度为0x10+0x16</span></span><br><span class="line">                start_flag=input.find(<span class="number">0xA5</span>);</span><br><span class="line">                 <span class="keyword">if</span>(start_flag!=<span class="built_in">std</span>::<span class="built_in">string</span>::npos)&#123;<span class="comment">//</span></span><br><span class="line">                    <span class="keyword">if</span>(input[start_flag+<span class="number">1</span>]==<span class="number">0x5A</span>&amp;&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">2</span>]+<span class="number">1</span>]==<span class="number">0xAA</span>)&#123;</span><br><span class="line">                        <span class="comment">//is a data</span></span><br><span class="line">                        <span class="keyword">if</span>((<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">3</span>]==<span class="number">0xA1</span>)&#123;</span><br><span class="line">                            <span class="keyword">int16_t</span> yaw,pitch,roll,alt,tempr,press,IMUpersec;</span><br><span class="line">                            yaw       =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">4</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">5</span>]);</span><br><span class="line">                            pitch     =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">6</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">7</span>]);</span><br><span class="line">                            roll      =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">8</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">9</span>]);</span><br><span class="line">                            alt       =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">10</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">11</span>]);</span><br><span class="line">                            tempr     =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">12</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">13</span>]);</span><br><span class="line">                            press     =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">14</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">15</span>]);</span><br><span class="line">                            IMUpersec =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">16</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">17</span>]);</span><br><span class="line"></span><br><span class="line">                            <span class="keyword">if</span>(yaw&amp;<span class="number">0x8000</span>)yaw     =-(yaw&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(pitch&amp;<span class="number">0x8000</span>)pitch =-(pitch&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(roll&amp;<span class="number">0x8000</span>)roll   =-(roll&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">							<span class="comment">//计算航向角对应的四元素</span></span><br><span class="line">                            tf::Quaternion orientation=tf::createQuaternionFromRPY(roll*<span class="number">0.1</span>*M_PI/<span class="number">180.0</span>, pitch*<span class="number">0.1</span>*M_PI/<span class="number">180.0</span>, yaw*<span class="number">0.1</span>*M_PI/<span class="number">180.0</span>);</span><br><span class="line">                            tf::Quaternion differential_rotation=zero_orientation.inverse()*orientation;</span><br><span class="line">                            quaternionTFToMsg(differential_rotation, imu.orientation);</span><br><span class="line">                            ros::Time measurement_time = ros::Time::now() + ros::Duration(<span class="number">0.0</span>);</span><br><span class="line">                            transform.setRotation(differential_rotation);</span><br><span class="line">                            tf_br.sendTransform(tf::StampedTransform(transform, measurement_time, <span class="string">"imu_base"</span>, <span class="string">"imu_link"</span>));</span><br><span class="line">                            ROS_DEBUG_STREAM(<span class="string">"roll"</span>&lt;&lt;roll*<span class="number">0.1</span>&lt;&lt;<span class="string">"  pitch"</span>&lt;&lt;pitch*<span class="number">0.1</span>&lt;&lt;<span class="string">"  yaw"</span>&lt;&lt;yaw*<span class="number">0.1</span>&lt;&lt;<span class="string">"  tem"</span>&lt;&lt;tempr*<span class="number">0.1</span>);</span><br><span class="line"></span><br><span class="line">                            input.erase(<span class="number">0</span>,start_flag+input[start_flag+<span class="number">2</span>]+<span class="number">1</span>);</span><br><span class="line">                        &#125;<span class="keyword">else</span> <span class="keyword">if</span>((<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">3</span>]==<span class="number">0xA2</span>)&#123;</span><br><span class="line">                            <span class="keyword">int16_t</span> ax,ay,az,gx,gy,gz,hx,hy,hz;</span><br><span class="line">                            ax =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">4</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">5</span>]);</span><br><span class="line">                            ay =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">6</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">7</span>]);</span><br><span class="line">                            az =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">8</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">9</span>]);</span><br><span class="line">                            gx =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">10</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">11</span>]);</span><br><span class="line">                            gy =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">12</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">13</span>]);</span><br><span class="line">                            gz =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">14</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">15</span>]);</span><br><span class="line">                            hx =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">16</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">17</span>]);</span><br><span class="line">                            hy =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">18</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">19</span>]);</span><br><span class="line">                            hz =((<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">20</span>])&lt;&lt;<span class="number">8</span>)|(<span class="number">0xff</span>&amp;(<span class="keyword">unsigned</span> <span class="keyword">char</span>)input[start_flag+<span class="number">21</span>]);</span><br><span class="line"></span><br><span class="line">                            <span class="keyword">if</span>(ax&amp;<span class="number">0x8000</span>)ax     =-(ax&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(ay&amp;<span class="number">0x8000</span>)ay     =-(ay&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(az&amp;<span class="number">0x8000</span>)az     =-(az&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(gx&amp;<span class="number">0x8000</span>)gx     =-(gx&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(gy&amp;<span class="number">0x8000</span>)gy     =-(gy&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(gz&amp;<span class="number">0x8000</span>)gz     =-(gz&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(hx&amp;<span class="number">0x8000</span>)hx     =-(hx&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(hy&amp;<span class="number">0x8000</span>)hy     =-(hy&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            <span class="keyword">if</span>(hz&amp;<span class="number">0x8000</span>)hz     =-(hz&amp;<span class="number">0x7FFF</span>);</span><br><span class="line">                            imu.header.stamp =  ros::Time::now();</span><br><span class="line">                            imu.header.frame_id = <span class="string">"imu_link"</span>;</span><br><span class="line">                            imu.angular_velocity.x =gx * (<span class="number">2000.0</span>/<span class="number">65536.0</span>) ;</span><br><span class="line">                            imu.angular_velocity.y =gy * (<span class="number">2000.0</span>/<span class="number">65536.0</span>) ;</span><br><span class="line">                            imu.angular_velocity.z =gz * (<span class="number">2000.0</span>/<span class="number">65536.0</span>) ;</span><br><span class="line">                            imu.linear_acceleration.x = ax *(<span class="number">4.2</span>/<span class="number">65536.0</span>)*<span class="number">9.81</span>;</span><br><span class="line">                            imu.linear_acceleration.y = ay *(<span class="number">4.2</span>/<span class="number">65536.0</span>)*<span class="number">9.81</span>;</span><br><span class="line">                            imu.linear_acceleration.z = az *(<span class="number">4.2</span>/<span class="number">65536.0</span>)*<span class="number">9.81</span>;</span><br><span class="line">                            IMU_pub.publish(imu);</span><br><span class="line">                            input.erase(<span class="number">0</span>,start_flag+input[start_flag+<span class="number">2</span>]+<span class="number">1</span>);</span><br><span class="line">                        &#125;<span class="keyword">else</span>&#123;<span class="comment">//error !!</span></span><br><span class="line">                            ROS_INFO_STREAM(<span class="string">"error data!!!"</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                        <span class="keyword">if</span>(input.length()&gt;=start_flag+<span class="number">24</span>)</span><br><span class="line">                            input.erase(<span class="number">0</span>,start_flag+<span class="number">1</span>);</span><br><span class="line">                        <span class="keyword">else</span></span><br><span class="line">                            input.erase(<span class="number">0</span>,start_flag);</span><br><span class="line">                    &#125;</span><br><span class="line">                 &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    input.clear();</span><br><span class="line">                 &#125;</span><br><span class="line">            &#125;</span><br><span class="line">             <span class="comment">//将串口数据发布到主题sensor</span></span><br><span class="line">             <span class="comment">// sensor_pub.publish(serial_data);</span></span><br><span class="line">         &#125;</span><br><span class="line">         loop_rate.sleep();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-6编写launch文件"><a href="#2-6编写launch文件" class="headerlink" title="2.6编写launch文件"></a>2.6编写launch文件</h4><p>总共使用四个姿态传感器因此使用四个USB口,注意name和value名称不要冲突<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">launch</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"uart_read"</span> <span class="attr">type</span>=<span class="string">"uart_read_node"</span> <span class="attr">name</span>=<span class="string">"uart_read_node0"</span> <span class="attr">required</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"port"</span> <span class="attr">value</span>=<span class="string">"/dev/ttyUSB0"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"NodeHandle_name"</span> <span class="attr">value</span>=<span class="string">"imu0"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"pub_name"</span> <span class="attr">value</span>=<span class="string">"data"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"uart_read"</span> <span class="attr">type</span>=<span class="string">"uart_read_node"</span> <span class="attr">name</span>=<span class="string">"uart_read_node1"</span> <span class="attr">required</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"port"</span> <span class="attr">value</span>=<span class="string">"/dev/ttyUSB1"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"NodeHandle_name"</span> <span class="attr">value</span>=<span class="string">"imu1"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"pub_name"</span> <span class="attr">value</span>=<span class="string">"data1"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"uart_read"</span> <span class="attr">type</span>=<span class="string">"uart_read_node"</span> <span class="attr">name</span>=<span class="string">"uart_read_node2"</span> <span class="attr">required</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"port"</span> <span class="attr">value</span>=<span class="string">"/dev/ttyUSB2"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"NodeHandle_name"</span> <span class="attr">value</span>=<span class="string">"imu2"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"pub_name"</span> <span class="attr">value</span>=<span class="string">"data1"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"uart_read"</span> <span class="attr">type</span>=<span class="string">"uart_read_node"</span> <span class="attr">name</span>=<span class="string">"uart_read_node3"</span> <span class="attr">required</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"port"</span> <span class="attr">value</span>=<span class="string">"/dev/ttyUSB3"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"NodeHandle_name"</span> <span class="attr">value</span>=<span class="string">"imu3"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"pub_name"</span> <span class="attr">value</span>=<span class="string">"data1"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">launch</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="3-固定USBID编号"><a href="#3-固定USBID编号" class="headerlink" title="3. 固定USBID编号"></a>3. 固定USBID编号</h3>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog.github.io/tags/ROS-ubuntu-raspberry/" rel="tag"># ROS,ubuntu,raspberry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-1/" rel="next" title="ROS开发（一）——开发板上ROS环境搭建">
+                <i class="fa fa-chevron-left"></i> ROS开发（一）——开发板上ROS环境搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-3/" rel="prev" title="ROS开发（二）——添加传感器话题(压力传感器)">
+                ROS开发（二）——添加传感器话题(压力传感器) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/blog.github.io/images/avatar.gif" alt="ShiSanChuan">
+          <p class="site-author-name" itemprop="name">ShiSanChuan</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/blog.github.io/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MINI-SRC姿态传感器-UART"><span class="nav-number">1.</span> <span class="nav-text">MINI SRC姿态传感器(UART)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-传感器数据协议"><span class="nav-number">1.1.</span> <span class="nav-text">1. 传感器数据协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编写发布话题数据包"><span class="nav-number">1.2.</span> <span class="nav-text">2.    编写发布话题数据包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1安装额外ROS依赖包（见一）"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1安装额外ROS依赖包（见一）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2ubuntu创建ROS包"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2ubuntu创建ROS包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3编写CMakeLists-txt"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3编写CMakeLists.txt</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4修改package-xml"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4修改package.xml</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5编写文件src-uart-read-cpp（原生成-cpp文件修改名称得到）"><span class="nav-number">1.2.5.</span> <span class="nav-text">2.5编写文件src/uart_read.cpp（原生成.cpp文件修改名称得到）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6编写launch文件"><span class="nav-number">1.2.6.</span> <span class="nav-text">2.6编写launch文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-固定USBID编号"><span class="nav-number">1.3.</span> <span class="nav-text">3. 固定USBID编号</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShiSanChuan</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/blog.github.io/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog.github.io/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/blog.github.io/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/blog.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog.github.io/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ROS,ubuntu,raspberry,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/blog.github.io/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="这是一个通过ROS通信控制maxon电机的教程，电机通信是通过CAN通信">
+<meta name="keywords" content="ROS,ubuntu,raspberry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROS开发（二）——添加电机驱动话题(电机驱动)">
+<meta property="og:url" content="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-4/index.html">
+<meta property="og:site_name" content="13号下午茶">
+<meta property="og:description" content="这是一个通过ROS通信控制maxon电机的教程，电机通信是通过CAN通信">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-11T13:08:06.835Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ROS开发（二）——添加电机驱动话题(电机驱动)">
+<meta name="twitter:description" content="这是一个通过ROS通信控制maxon电机的教程，电机通信是通过CAN通信">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog.github.io/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-4/">
+
+
+
+
+
+  <title>ROS开发（二）——添加电机驱动话题(电机驱动) | 13号下午茶</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog.github.io/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">13号下午茶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">记录研究生学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog.github.io/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shisanchuan.github.io/blog.github.io/blog.github.io/2018/11/11/ROS-robot-4/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShiSanChuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="13号下午茶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ROS开发（二）——添加电机驱动话题(电机驱动)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-11T19:30:38+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一个通过ROS通信控制maxon电机的教程，电机通信是通过CAN通信<br><a id="more"></a></p>
+<h2 id="maxon电机"><a href="#maxon电机" class="headerlink" title="maxon电机"></a>maxon电机</h2><ul>
+<li><a href="https://www.maxonmotor.com.cn/maxon/view/content/index" target="_blank" rel="noopener">maxon电机</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>型号</th>
+<th>额定电压</th>
+<th>额定电流</th>
+<th>额定转速</th>
+<th>额定转矩</th>
+<th>功率</th>
+<th>重量</th>
+<th>直径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EC-i40(496652)</td>
+<td>36V</td>
+<td>1.61A</td>
+<td>6080rpm</td>
+<td>78.2mNm</td>
+<td>50W</td>
+<td>180g</td>
+<td>40mm</td>
+</tr>
+<tr>
+<td>EC-i40(496655)</td>
+<td>36V</td>
+<td>2.73A</td>
+<td>6450rpm</td>
+<td>129mNm</td>
+<td>70W</td>
+<td>250g</td>
+<td>40mm</td>
+</tr>
+<tr>
+<td>EC-i40(496661)</td>
+<td>36V</td>
+<td>2.72A</td>
+<td>3950rpm</td>
+<td>207rpm</td>
+<td>100W</td>
+<td>390g</td>
+<td>40mm</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-CAN通信命令"><a href="#1-CAN通信命令" class="headerlink" title="1.CAN通信命令"></a>1.CAN通信命令</h3><h3 id="2-编写接受话题数据包"><a href="#2-编写接受话题数据包" class="headerlink" title="2. 编写接受话题数据包"></a>2. 编写接受话题数据包</h3><h4 id="2-1-MCP2515-SPI转CAN通信"><a href="#2-1-MCP2515-SPI转CAN通信" class="headerlink" title="2.1 MCP2515 SPI转CAN通信"></a>2.1 MCP2515 SPI转CAN通信</h4><p>由于树莓派上没有CAN通信接口，MCP2515将SPI控制信号转为CAN通信信号,添加<a href="https://www.airspayce.com/mikem/bcm2835/" target="_blank" rel="noopener">BCM2835</a>库，该库是用于调用SPI等资源的库</p>
+<pre><code>- wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.57.tar.gz 
+- tar zxvf bcm2835-1.57.tar.gz
+- cd bcm2835-1.57.tar.gz
+- ./configure
+- make
+- sudo make install
+</code></pre><h4 id="2-2-编写FindBCM2835-cmake文件"><a href="#2-2-编写FindBCM2835-cmake文件" class="headerlink" title="2.2 编写FindBCM2835.cmake文件"></a>2.2 编写FindBCM2835.cmake文件</h4><p>同样在<code>/opt/cmake-3.12.1/Modules</code>文件夹中添加该cmake文件，用于寻找到BCM2835的库</p>
+<ul>
+<li>vim  FindBCM2835.cmake<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">find_path</span> (BCM2835_INCLUDE_DIR bcm2835.h )</span><br><span class="line"><span class="keyword">find_library</span> (BCM2835_LIBRARY NAMES bcm2835)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> (BCM2835_LIBRARIES <span class="variable">$&#123;BCM2835_LIBRARY&#125;</span> )</span><br><span class="line"><span class="keyword">set</span> (BCM2835_INCLUDE_DIRS <span class="variable">$&#123;BCM2835_INCLUDE_DIR&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(FindPackageHandleStandardArgs)</span><br><span class="line"><span class="comment"># handle the QUIETLY and REQUIRED arguments and set BCM2835_FOUND to TRUE</span></span><br><span class="line"><span class="comment"># if all listed variables are TRUE</span></span><br><span class="line">find_package_handle_standard_args(BCM2835 DEFAULT_MSG</span><br><span class="line">                                  BCM2835_LIBRARY BCM2835_INCLUDE_DIR)</span><br><span class="line"></span><br><span class="line"><span class="keyword">mark_as_advanced</span> (BCM2835_INCLUDE_DIR BCM2835_LIBRARY )</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="2-3-编写一个MOTOR库用于将CAN控制命令封装"><a href="#2-3-编写一个MOTOR库用于将CAN控制命令封装" class="headerlink" title="2.3 编写一个MOTOR库用于将CAN控制命令封装"></a>2.3 编写一个MOTOR库用于将CAN控制命令封装</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>	CAN_10Kbps	0x31</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CAN_25Kbps	0x13</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CAN_50Kbps	0x09</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CAN_100Kbps	0x04</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CAN_125Kbps	0x03</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CAN_250Kbps	0x01</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span>	CAN_500Kbps	0x00</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SCK 14</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SI 12</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SO 13</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CS 10   <span class="comment">//CE0	</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTIN 3 </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> RST 4</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TXREQ_M 0b11110111</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CH 0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;mcp2515.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;bcm2835.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;wiringPi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"motor.h"</span></span></span><br><span class="line"><span class="comment">//写一个字节</span></span><br><span class="line"><span class="keyword">void</span> MOTOR::MCP2515_WriteByte(<span class="keyword">unsigned</span> <span class="keyword">char</span> addr,<span class="keyword">unsigned</span> <span class="keyword">char</span> dat)&#123; </span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buf = CAN_WRITE;</span><br><span class="line">	<span class="keyword">char</span> spiDat[] = &#123;CAN_WRITE,addr,dat&#125;;</span><br><span class="line">	digitalWrite(CS,LOW);			</span><br><span class="line">	bcm2835_spi_transfern(spiDat,<span class="number">3</span>);</span><br><span class="line">	digitalWrite(CS,HIGH);				</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读一个字节</span></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> MOTOR::MCP2515_ReadByte(<span class="keyword">unsigned</span> <span class="keyword">char</span> addr)&#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> rByte = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">char</span> spiDat[] = &#123;CAN_READ,addr,<span class="number">0xff</span>&#125;;</span><br><span class="line">	digitalWrite(CS,LOW);				</span><br><span class="line">	bcm2835_spi_transfern(spiDat,<span class="number">3</span>);</span><br><span class="line">	digitalWrite(CS,HIGH);			</span><br><span class="line">		rByte = spiDat[<span class="number">2</span>];</span><br><span class="line">	<span class="keyword">return</span> rByte;				</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> MOTOR::MCP2515_Reset(<span class="keyword">void</span>)&#123;</span><br><span class="line">	digitalWrite(CS,LOW);</span><br><span class="line">	delay(<span class="number">100</span>);</span><br><span class="line">	<span class="keyword">char</span> spiDat[]=&#123;CAN_RESET&#125;;</span><br><span class="line">	bcm2835_spi_transfern(spiDat,<span class="number">1</span>);</span><br><span class="line">	digitalWrite(CS,HIGH);</span><br><span class="line">	delay(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> MOTOR::MCP2515_Init(<span class="keyword">void</span>)&#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> temp=<span class="number">1</span>;</span><br><span class="line">	MCP2515_Reset();</span><br><span class="line">	MCP2515_WriteByte(CNF1,CAN_125Kbps);</span><br><span class="line">	MCP2515_WriteByte(CNF2,<span class="number">0x80</span>|PHSEG1_3TQ|PRSEG_1TQ);</span><br><span class="line">	MCP2515_WriteByte(CNF3,PHSEG2_3TQ);</span><br><span class="line">	MCP2515_WriteByte(RXB0CTRL,<span class="number">0x60</span>);</span><br><span class="line">	MCP2515_WriteByte(RXB0DLC,<span class="number">8</span>);</span><br><span class="line">	MCP2515_WriteByte(RXF0SIDH,<span class="number">0x0A</span>);</span><br><span class="line">	MCP2515_WriteByte(RXF0SIDL,<span class="number">0x58</span>);</span><br><span class="line">	MCP2515_WriteByte(RXM0SIDH,<span class="number">0xFF</span>);</span><br><span class="line">	MCP2515_WriteByte(RXM0SIDL,<span class="number">0xE0</span>);</span><br><span class="line">	MCP2515_WriteByte(RXB0SIDH,<span class="number">0x00</span>);</span><br><span class="line">	MCP2515_WriteByte(RXB0SIDL,<span class="number">0x00</span>);</span><br><span class="line">	MCP2515_WriteByte(CANINTE,<span class="number">0x01</span>);</span><br><span class="line">	MCP2515_WriteByte(CANINTF,<span class="number">0x00</span>);</span><br><span class="line">	MCP2515_WriteByte(CANCTRL,REQOP_NORMAL|CLKOUT_ENABLED);</span><br><span class="line">	temp=MCP2515_ReadByte(CANSTAT);</span><br><span class="line">	<span class="keyword">while</span>(OPMODE_NORMAL!=(temp &amp; <span class="number">0xE0</span>))</span><br><span class="line">	&#123;</span><br><span class="line">	  	MCP2515_WriteByte(CANCTRL,REQOP_NORMAL|CLKOUT_ENABLED);</span><br><span class="line">		temp=MCP2515_ReadByte(CANSTAT);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> MOTOR::CAN_Send_Buffer(<span class="keyword">unsigned</span> <span class="keyword">char</span> *CAN_TX_Buf,<span class="keyword">unsigned</span> <span class="keyword">char</span> len) &#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> dly,j;</span><br><span class="line">	<span class="keyword">int</span> count=<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">while</span>(count&lt;len)&#123;</span><br><span class="line">		dly=<span class="number">0</span>;</span><br><span class="line">		<span class="keyword">while</span>((MCP2515_ReadByte(TXB0CTRL)&amp;<span class="number">0x08</span>) &amp;&amp; (dly&lt;<span class="number">50</span>))&#123;</span><br><span class="line">			bcm2835_delay(<span class="number">1</span>);</span><br><span class="line">			dly++;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span>(j=<span class="number">0</span>;j&lt;<span class="number">8</span>;)&#123;</span><br><span class="line">			MCP2515_WriteByte(TXB0D0+j,CAN_TX_Buf[count++]);</span><br><span class="line">			j++;</span><br><span class="line">			<span class="keyword">if</span>(count&gt;=len) <span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		MCP2515_WriteByte(TXB0DLC,j);</span><br><span class="line">		<span class="comment">// printf("%d\n",j);</span></span><br><span class="line">		digitalWrite(CS,LOW);	</span><br><span class="line">		MCP2515_WriteByte(TXB0CTRL,<span class="number">0x08</span>);</span><br><span class="line">		digitalWrite(CS,HIGH);	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> MOTOR::CAN_Receive_Buffer(<span class="keyword">unsigned</span> <span class="keyword">char</span> *CAN_RX_Buf)&#123;   	</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> i=<span class="number">0</span>,len=<span class="number">0</span>,temp=<span class="number">0</span>;</span><br><span class="line">	temp = MCP2515_ReadByte(CANINTF);</span><br><span class="line">	<span class="comment">// printf("CANINTF: %02x\n",temp);</span></span><br><span class="line">	<span class="keyword">if</span>(temp &amp; <span class="number">0x01</span>)&#123;</span><br><span class="line">		len=MCP2515_ReadByte(RXB0DLC);</span><br><span class="line">		<span class="keyword">while</span>(i&lt;len)</span><br><span class="line">		&#123;   </span><br><span class="line">				CAN_RX_Buf[i]=MCP2515_ReadByte(RXB0D0+i);</span><br><span class="line">		i++;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">   	MCP2515_WriteByte(CANINTF,<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> len;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> MOTOR::bcm2835_SPISetup(<span class="keyword">void</span>)&#123;</span><br><span class="line">	<span class="keyword">if</span> (!bcm2835_init())&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"bcm2835_init failed. Are you running as root??\n"</span>);</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!bcm2835_spi_begin())&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"bcm2835_spi_begin failed. Are you running as root??\n"</span>);</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      <span class="comment">// The default</span></span><br><span class="line">    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   <span class="comment">// The default</span></span><br><span class="line">    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_65536); <span class="comment">// The default</span></span><br><span class="line">    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      <span class="comment">// The default</span></span><br><span class="line">    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      <span class="comment">// the default</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> MOTOR::CAN_ReciveByte(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">unsigned</span> <span class="keyword">char</span> * data_Buff)&#123;</span><br><span class="line">	MCP2515_WriteByte(RXB0CTRL,<span class="number">0x20</span>); </span><br><span class="line">	MCP2515_WriteByte(RXF0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>);</span><br><span class="line">	MCP2515_WriteByte(RXF0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">int</span> len = CAN_Receive_Buffer((<span class="keyword">unsigned</span> <span class="keyword">char</span>*)data_Buff);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"data=%s\n"</span>,data_Buff);</span><br><span class="line">	<span class="keyword">return</span> len;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//激活CAN总线</span></span><br><span class="line"><span class="keyword">int</span> MOTOR::CAN_Start(<span class="keyword">void</span>)&#123;	</span><br><span class="line">	<span class="keyword">if</span>(wiringPiSetup() &lt; <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	pinMode(CS,OUTPUT);</span><br><span class="line">  	pinMode(INTIN,INPUT);</span><br><span class="line">	pinMode(RST,OUTPUT);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"wiringPi Setup OK\n"</span>);</span><br><span class="line">	bcm2835_SPISetup();</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"SPI Setup OK\n"</span>);</span><br><span class="line">	MCP2515_Init();</span><br><span class="line">	AriseAllMotor();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;	</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//使能速度模式</span></span><br><span class="line"><span class="keyword">void</span> MOTOR::ENABLEID_speed(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">24</span>]=&#123;<span class="number">0x22</span>,<span class="number">0x60</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x03</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">							<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x06</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">			        		<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0f</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//使能位置模式</span></span><br><span class="line"><span class="keyword">void</span> MOTOR::ENABLEID_position(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">24</span>]=&#123;<span class="number">0x22</span>,<span class="number">0x60</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">							<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x06</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">			        		<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0f</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> MOTOR::AriseAllMotor(<span class="keyword">void</span>)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,<span class="number">0x00</span>);</span><br><span class="line">    MCP2515_WriteByte(TXB0SIDL,<span class="number">0x20</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> canStart[]=&#123;<span class="number">0x00</span>,<span class="number">0x01</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(canStart,<span class="number">3</span>);</span><br><span class="line">	delay(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//速度模式</span></span><br><span class="line"><span class="keyword">int</span> MOTOR::CAN_VelocityMode(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">int</span> velocityOct)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> velocityHexH;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> velocityHexL;</span><br><span class="line">	<span class="keyword">if</span>(velocityOct &gt; <span class="number">0</span>)&#123;</span><br><span class="line">		velocityHexH = (velocityOct&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">		velocityHexL = velocityOct&amp;<span class="number">0xff</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">16</span>]=&#123;<span class="number">0x22</span>,<span class="number">0xff</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,velocityHexL,velocityHexH,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">			        		<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0f</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">16</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//位置模式</span></span><br><span class="line"><span class="keyword">int</span> MOTOR::CAN_PositionMode(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">int</span> positionOct)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> positionHexH = (positionOct&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> positionHexL = positionOct&amp;<span class="number">0xff</span>;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">16</span>]=&#123;<span class="number">0x22</span>,<span class="number">0x7a</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,positionHexL,positionHexH,<span class="number">0x00</span>,<span class="number">0x00</span>,</span><br><span class="line">			        		<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0f</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">16</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> MOTOR::Stop(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">8</span>]=&#123;<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0b</span>,<span class="number">0x00</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span> MOTOR::Halt(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)&#123;</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDH,(CANID&gt;&gt;<span class="number">3</span>)&amp;<span class="number">0x1F</span>|<span class="number">0xc0</span>);</span><br><span class="line">	MCP2515_WriteByte(TXB0SIDL,(CANID&lt;&lt;<span class="number">5</span>)&amp;<span class="number">0xE0</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> buff[<span class="number">8</span>]=&#123;<span class="number">0x22</span>,<span class="number">0x40</span>,<span class="number">0x60</span>,<span class="number">0x00</span>,<span class="number">0x0f</span>,<span class="number">0x01</span>,<span class="number">0x00</span>,<span class="number">0x00</span>&#125;;</span><br><span class="line">	CAN_Send_Buffer(buff,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line">MOTOR::~MOTOR(<span class="keyword">void</span>)&#123;</span><br><span class="line">	bcm2835_spi_end();</span><br><span class="line">  	bcm2835_close();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">void</span>  MOTOR::test(<span class="keyword">void</span>)<span class="comment">//测试电机</span></span><br><span class="line">&#123;</span><br><span class="line">	CAN_Start();</span><br><span class="line">	ENABLEID_speed(<span class="number">0x01</span>);</span><br><span class="line">	CAN_VelocityMode(<span class="number">0x01</span>,<span class="number">2000</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	<span class="comment">// CAN_PositionMode(0x01,2000);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-4编写motor-h头文件"><a href="#2-4编写motor-h头文件" class="headerlink" title="2.4编写motor.h头文件"></a>2.4编写motor.h头文件</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _MOTOR_H</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _MOTOR_H</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MOTOR</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	MOTOR(<span class="keyword">void</span>)&#123;&#125;</span><br><span class="line">	~MOTOR(<span class="keyword">void</span>);</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">CAN_Start</span><span class="params">(<span class="keyword">void</span>)</span></span>;<span class="comment">//使能CAＮ</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">AriseAllMotor</span><span class="params">(<span class="keyword">void</span>)</span></span>;<span class="comment">//唤醒电机</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">ENABLEID_speed</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)</span></span>;<span class="comment">//使能速度模式</span></span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">CAN_VelocityMode</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">int</span> velocityOct)</span></span>;<span class="comment">//速度模式设置参数</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">ENABLEID_position</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)</span></span>;<span class="comment">//使能位置模式</span></span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">CAN_PositionMode</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">int</span> positionOct)</span></span>;<span class="comment">//位置模式设置参数</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">Stop</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)</span></span>;<span class="comment">//急停</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">Halt</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID)</span></span>;<span class="comment">//停止</span></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">CAN_Send_Buffer</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> *CAN_TX_Buf,<span class="keyword">unsigned</span> <span class="keyword">char</span> len)</span></span>;<span class="comment">//向主机上发送一段数据</span></span><br><span class="line">	<span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">CAN_Receive_Buffer</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> *CAN_RX_Buf)</span></span>;<span class="comment">//全部接受一段数据</span></span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">CAN_ReciveByte</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> CANID,<span class="keyword">unsigned</span> <span class="keyword">char</span> * data_Buff)</span></span>;<span class="comment">//接受来自ID的数据</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">test</span><span class="params">(<span class="keyword">void</span>)</span></span>;<span class="comment">//电机测试</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> CAN_R_Buffer[<span class="number">8</span>];</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> CAN_R_Buffer2[<span class="number">8</span>];</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">bcm2835_SPISetup</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">MCP2515_Reset</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">MCP2515_Init</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">MCP2515_WriteByte</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> addr,<span class="keyword">unsigned</span> <span class="keyword">char</span> dat)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">unsigned</span> <span class="keyword">char</span> <span class="title">MCP2515_ReadByte</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">char</span> addr)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="2-5-创建motor-control话题订阅包"><a href="#2-5-创建motor-control话题订阅包" class="headerlink" title="2.5 创建motor_control话题订阅包"></a>2.5 创建motor_control话题订阅包</h4><pre><code>-  roscreate-pkg motor_control roscpp
+</code></pre><h4 id="2-6-编写CmakeLists-txt文件"><a href="#2-6-编写CmakeLists-txt文件" class="headerlink" title="2.6 编写CmakeLists.txt文件"></a>2.6 编写CmakeLists.txt文件</h4><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">2.8</span>.<span class="number">3</span>)</span><br><span class="line"><span class="keyword">project</span>(motor_control)</span><br><span class="line"><span class="keyword">add_compile_options</span>(-std=c++<span class="number">11</span>)</span><br><span class="line"><span class="keyword">find_package</span>(catkin REQUIRED COMPONENTS</span><br><span class="line">  roscpp</span><br><span class="line">  std_msgs</span><br><span class="line">  sensor_msgs</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>(Boost REQUIRED COMPONENTS system)</span><br><span class="line"><span class="keyword">find_package</span>(BCM2835 REQUIRED)</span><br><span class="line"><span class="keyword">find_package</span>(WiringPi REQUIRED)</span><br><span class="line"></span><br><span class="line">catkin_package(</span><br><span class="line"> INCLUDE_DIRS <span class="keyword">include</span></span><br><span class="line"><span class="comment">#  LIBRARIES motor_control</span></span><br><span class="line"> CATKIN_DEPENDS roscpp  std_msgs sensor_msgs</span><br><span class="line"><span class="comment">#  DEPENDS system_lib</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_directories</span>(</span><br><span class="line">  <span class="keyword">include</span></span><br><span class="line">  <span class="variable">$&#123;catkin_INCLUDE_DIRS&#125;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node src/motor_control_node.cpp src/motor.cpp)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">  <span class="variable">$&#123;WIRINGPI_LIBRARIES&#125;</span></span><br><span class="line">  <span class="variable">$&#123;BCM2835_LIBRARY&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h4 id="2-7-编写package-xml文件"><a href="#2-7-编写package-xml文件" class="headerlink" title="2.7 编写package.xml文件"></a>2.7 编写package.xml文件</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">package</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>motor_control<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span>The motor_control package<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">maintainer</span> <span class="attr">email</span>=<span class="string">"shisanchuan@todo.todo"</span>&gt;</span>shisanchuan<span class="tag">&lt;/<span class="name">maintainer</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">license</span>&gt;</span>TODO<span class="tag">&lt;/<span class="name">license</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">buildtool_depend</span>&gt;</span>catkin<span class="tag">&lt;/<span class="name">buildtool_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- The export tag contains other, unspecified, tags --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">export</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Other tools can request additional information be placed here --&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">export</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-8-在include文件夹中添加头文件"><a href="#2-8-在include文件夹中添加头文件" class="headerlink" title="2.8 在include文件夹中添加头文件"></a>2.8 在include文件夹中添加头文件</h4><ul>
+<li>添加<a href="code/bcm2835.h">bcm2835.h文件</a></li>
+<li>添加<a href="code/mcp2515.h">mcp2515.h文件</a></li>
+<li>添加上面motor.h文件</li>
+</ul>
+<h4 id="2-9-编写motor-control-node-cpp文件"><a href="#2-9-编写motor-control-node-cpp文件" class="headerlink" title="2.9 编写motor_control_node.cpp文件"></a>2.9 编写motor_control_node.cpp文件</h4><p>由于电机拥有四个，将四个定义为<code>right_ID1</code>、<code>right_ID2</code>、<code>left_ID1</code>、<code>left_ID2</code>，通过订阅话题实现控制电机<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;std_msgs/Int16.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;std_msgs/Empty.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ros/ros.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"motor.h"</span></span></span><br><span class="line"><span class="keyword">int</span> right_ID1,right_ID2;</span><br><span class="line"><span class="keyword">int</span> left_ID1,left_ID2;</span><br><span class="line">MOTOR motor;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">speedCallback</span><span class="params">(<span class="keyword">const</span> std_msgs::Int16::ConstPtr &amp;msg,<span class="keyword">int</span> &amp;CAN_ID)</span><span class="comment">//速度模式回调函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  	ROS_INFO(<span class="string">"Set [%d] : speed[%d]"</span>, CAN_ID,msg-&gt;data); </span><br><span class="line">	motor.CAN_VelocityMode((<span class="keyword">unsigned</span> <span class="keyword">char</span>)CAN_ID,msg-&gt;data);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">siteCallback</span><span class="params">(<span class="keyword">const</span> std_msgs::Int16::ConstPtr &amp;msg,<span class="keyword">int</span> &amp;CAN_ID)</span><span class="comment">//位置模式回调函数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  	ROS_DEBUG(<span class="string">"Set [%d] : Position[%d]"</span>, CAN_ID,msg-&gt;data);</span><br><span class="line">	motor.CAN_PositionMode((<span class="keyword">unsigned</span> <span class="keyword">char</span>)CAN_ID,msg-&gt;data);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HaltCallback</span><span class="params">(<span class="keyword">const</span> std_msgs::Int16::ConstPtr &amp;msg,,<span class="keyword">int</span> &amp;CAN_ID)</span></span>&#123;<span class="comment">//停止回调函数，没有添加急停是当前方案中没有需要急停的模式</span></span><br><span class="line">	ROS_DEBUG(<span class="string">"Set [%d] : Halt!!"</span>, CAN_ID);</span><br><span class="line">	motor.Halt(CAN_ID);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	ros::init(argc, argv, <span class="string">"motor"</span>);</span><br><span class="line">	<span class="keyword">bool</span> ENABLESPEED;</span><br><span class="line">	ros::<span class="function">NodeHandle <span class="title">private_node_handle</span><span class="params">(<span class="string">"~"</span>)</span></span>;</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"right_ID1"</span>,right_ID1,<span class="number">0x01</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"right_ID2"</span>,right_ID2,<span class="number">0x02</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"left_ID1"</span>,left_ID1,<span class="number">0x03</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"left_ID2"</span>,left_ID2,<span class="number">0x04</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">bool</span>&gt;(<span class="string">"ENABLESPEED"</span>,ENABLESPEED,<span class="literal">true</span>);</span><br><span class="line">	<span class="comment">//motor.test();//测试完成２０１８１１０７</span></span><br><span class="line">	ros::Subscriber sub1,sub2,sub3,sub4,halt1,halt2,halt3,halt4;</span><br><span class="line">	motor.CAN_Start();</span><br><span class="line">	ros::NodeHandle n;</span><br><span class="line">	<span class="keyword">if</span>(ENABLESPEED)&#123;</span><br><span class="line">		motor.ENABLEID_speed(right_ID1);</span><br><span class="line">		motor.ENABLEID_speed(right_ID2);</span><br><span class="line">		motor.ENABLEID_speed(left_ID1);</span><br><span class="line">		motor.ENABLEID_speed(left_ID2);</span><br><span class="line">		sub1 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"right_speed1_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID1), <span class="number">1</span>, boost::bind(&amp;speedCallback,_1,right_ID1));</span><br><span class="line">		sub2 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"right_speed2_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID2), <span class="number">1</span>, boost::bind(&amp;speedCallback,_1,right_ID2));</span><br><span class="line">		sub3 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"left_speed1_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID1), <span class="number">1</span>, boost::bind(&amp;speedCallback,_1,left_ID1));</span><br><span class="line">		sub4 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"left_speed2_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID2), <span class="number">1</span>, boost::bind(&amp;speedCallback,_1,left_ID2));</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		motor.ENABLEID_position(right_ID1);</span><br><span class="line">		motor.ENABLEID_position(right_ID2);</span><br><span class="line">		motor.ENABLEID_position(left_ID1);</span><br><span class="line">		motor.ENABLEID_position(left_ID2);</span><br><span class="line">		sub1 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"right_site1_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID1), <span class="number">1</span>, boost::bind(&amp;siteCallback,_1,right_ID1));</span><br><span class="line">		sub2 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"right_site2_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID2), <span class="number">1</span>, boost::bind(&amp;siteCallback,_1,right_ID2));</span><br><span class="line">		sub3 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"left_site1_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID1), <span class="number">1</span>, boost::bind(&amp;siteCallback,_1,left_ID1));</span><br><span class="line">		sub4 = n.subscribe&lt;std_msgs::Int16&gt;(<span class="string">"left_site2_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID2), <span class="number">1</span>, boost::bind(&amp;siteCallback,_1,left_ID2));</span><br><span class="line">	&#125;</span><br><span class="line">	halt1=n.subscribe&lt;std_msgs::Empty&gt;(<span class="string">"right_Halt1_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID1),<span class="number">1</span>, boost::bind(&amp;HaltCallback,_1,right_ID1));</span><br><span class="line">	halt2=n.subscribe&lt;std_msgs::Empty&gt;(<span class="string">"right_Halt2_ID_"</span>+<span class="built_in">std</span>::to_string(right_ID2),<span class="number">1</span>, boost::bind(&amp;HaltCallback,_1,right_ID2));</span><br><span class="line">	halt3=n.subscribe&lt;std_msgs::Empty&gt;(<span class="string">"left_Halt1_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID1),<span class="number">1</span>, boost::bind(&amp;HaltCallback,_1,left_ID1));</span><br><span class="line">	halt4=n.subscribe&lt;std_msgs::Empty&gt;(<span class="string">"left_Halt2_ID_"</span>+<span class="built_in">std</span>::to_string(left_ID1),<span class="number">1</span>, boost::bind(&amp;HaltCallback,_1,left_ID2));</span><br><span class="line">	ros::spin();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-10-编写launch文件"><a href="#2-10-编写launch文件" class="headerlink" title="2.10 编写launch文件"></a>2.10 编写launch文件</h4><p>由于运行BCM2835库需要root权限，因此在launch文件中添加sudo启动支持，<code>ENABLESPEED</code>用于是否开启速度控制模式，１为启用速度模式，０为使用位置控制模式<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">launch</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"motor_control"</span> <span class="attr">type</span>=<span class="string">"motor_control_node"</span> <span class="attr">name</span>=<span class="string">"headbody"</span> <span class="attr">required</span>=<span class="string">"true"</span> <span class="attr">launch-prefix</span>=<span class="string">"sudo"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"right_ID1"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"1"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"right_ID2"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"2"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"left_ID1"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"3"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"left_ID2"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"4"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"ENABLESPEED"</span> <span class="attr">type</span>=<span class="string">"bool"</span>  <span class="attr">value</span>=<span class="string">"０"</span>/&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">launch</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog.github.io/tags/ROS-ubuntu-raspberry/" rel="tag"># ROS,ubuntu,raspberry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-3/" rel="next" title="ROS开发（二）——添加传感器话题(压力传感器)">
+                <i class="fa fa-chevron-left"></i> ROS开发（二）——添加传感器话题(压力传感器)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-５/" rel="prev" title="ROS开发（三）——搭建平台">
+                ROS开发（三）——搭建平台 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/blog.github.io/images/avatar.gif" alt="ShiSanChuan">
+          <p class="site-author-name" itemprop="name">ShiSanChuan</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/blog.github.io/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#maxon电机"><span class="nav-number">1.</span> <span class="nav-text">maxon电机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-CAN通信命令"><span class="nav-number">1.1.</span> <span class="nav-text">1.CAN通信命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编写接受话题数据包"><span class="nav-number">1.2.</span> <span class="nav-text">2. 编写接受话题数据包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-MCP2515-SPI转CAN通信"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 MCP2515 SPI转CAN通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-编写FindBCM2835-cmake文件"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 编写FindBCM2835.cmake文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-编写一个MOTOR库用于将CAN控制命令封装"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 编写一个MOTOR库用于将CAN控制命令封装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4编写motor-h头文件"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4编写motor.h头文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-创建motor-control话题订阅包"><span class="nav-number">1.2.5.</span> <span class="nav-text">2.5 创建motor_control话题订阅包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6-编写CmakeLists-txt文件"><span class="nav-number">1.2.6.</span> <span class="nav-text">2.6 编写CmakeLists.txt文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-7-编写package-xml文件"><span class="nav-number">1.2.7.</span> <span class="nav-text">2.7 编写package.xml文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-8-在include文件夹中添加头文件"><span class="nav-number">1.2.8.</span> <span class="nav-text">2.8 在include文件夹中添加头文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-9-编写motor-control-node-cpp文件"><span class="nav-number">1.2.9.</span> <span class="nav-text">2.9 编写motor_control_node.cpp文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-10-编写launch文件"><span class="nav-number">1.2.10.</span> <span class="nav-text">2.10 编写launch文件</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShiSanChuan</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/blog.github.io/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog.github.io/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/blog.github.io/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

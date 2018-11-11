@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/blog.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog.github.io/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ROS,Ubuntu,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/blog.github.io/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="这是个如何在树莓派上搭建ROS框架的文章，系统包括debian、ubuntu，其中debian使用源码编译，因为官方对debian系统支持的比较好，因此整个项目使用的是debian系统  在树莓派3B+ debian系统上编译安装ROS Kinetic版本 ubuntu版本安装（简单）">
+<meta name="keywords" content="ROS,Ubuntu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROS开发（一）——开发板上ROS环境搭建">
+<meta property="og:url" content="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-1/index.html">
+<meta property="og:site_name" content="13号下午茶">
+<meta property="og:description" content="这是个如何在树莓派上搭建ROS框架的文章，系统包括debian、ubuntu，其中debian使用源码编译，因为官方对debian系统支持的比较好，因此整个项目使用的是debian系统  在树莓派3B+ debian系统上编译安装ROS Kinetic版本 ubuntu版本安装（简单）">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-11T12:33:40.389Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ROS开发（一）——开发板上ROS环境搭建">
+<meta name="twitter:description" content="这是个如何在树莓派上搭建ROS框架的文章，系统包括debian、ubuntu，其中debian使用源码编译，因为官方对debian系统支持的比较好，因此整个项目使用的是debian系统  在树莓派3B+ debian系统上编译安装ROS Kinetic版本 ubuntu版本安装（简单）">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog.github.io/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-1/">
+
+
+
+
+
+  <title>ROS开发（一）——开发板上ROS环境搭建 | 13号下午茶</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog.github.io/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">13号下午茶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">记录研究生学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog.github.io/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shisanchuan.github.io/blog.github.io/blog.github.io/2018/11/11/ROS-robot-1/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShiSanChuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="13号下午茶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ROS开发（一）——开发板上ROS环境搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-11T13:15:32+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是个如何在树莓派上搭建ROS框架的文章，系统包括debian、ubuntu，其中debian使用源码编译，因为官方对debian系统支持的比较好，因此整个项目使用的是debian系统</p>
+<ul>
+<li>在树莓派3B+ debian系统上编译安装ROS Kinetic版本</li>
+<li>ubuntu版本安装（简单）</li>
+</ul>
+<a id="more"></a>
+<h2 id="在树莓派3B-debian系统上编译安装ROS-Kinetic版本"><a href="#在树莓派3B-debian系统上编译安装ROS-Kinetic版本" class="headerlink" title="在树莓派3B+ debian系统上编译安装ROS Kinetic版本"></a>在树莓派3B+ debian系统上编译安装ROS Kinetic版本</h2><p><a href="http://wiki.ros.org/ROSberryPi/Installing%20ROS%20Kinetic%20on%20the%20Raspberry%20Pi" target="_blank" rel="noopener">Installing ROS Kinetic on the Raspberry Pi</a></p>
+<h3 id="1-设置仓库"><a href="#1-设置仓库" class="headerlink" title="1.设置仓库"></a>1.设置仓库</h3><pre><code>-  sudo apt-get install dirmngr
+-  sudo sh -c &apos;echo &quot;deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&apos;
+-  sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+-  sudo apt-get update
+-  sudo apt-get upgrade
+</code></pre><h3 id="2-安装部分依赖包"><a href="#2-安装部分依赖包" class="headerlink" title="2.安装部分依赖包"></a>2.安装部分依赖包</h3><pre><code>- sudo apt-get install -y python-rosdep python-rosinstall-generator python-wstool python-rosinstall build-essential cmake
+- sudo rosdep init
+- rosdep update
+</code></pre><h3 id="3-建立代码空间安转ROS核心"><a href="#3-建立代码空间安转ROS核心" class="headerlink" title="3.建立代码空间安转ROS核心"></a>3.建立代码空间安转ROS核心</h3><pre><code>- mkdir ~/catkin_ws
+- cd ~/catkin_ws
+- rosinstall_generator ros_comm --rosdistro kinetic --deps --wet-only --tar &gt; kinetic-ros_comm-wet.rosinstall
+- wstool init src kinetic-ros_comm-wet.rosinstall
+</code></pre><h3 id="4-解决ROS包依赖"><a href="#4-解决ROS包依赖" class="headerlink" title="4.解决ROS包依赖"></a>4.解决ROS包依赖</h3><pre><code>- mkdir ~/catkin_ws/external_src
+- cd ~/catkin_ws/external_src
+- wget http://sourceforge.net/projects/assimp/files/assimp-3.1/assimp-3.1.1_no_test_models.zip/download -O assimp-3.1.1_no_test_models.zip
+- unzip assimp-3.1.1_no_test_models.zip
+- cd assimp-3.1.1
+- cmake .
+- make
+- sudo make install
+</code></pre><h3 id="5-解决rosdep依赖"><a href="#5-解决rosdep依赖" class="headerlink" title="5.解决rosdep依赖"></a>5.解决rosdep依赖</h3><pre><code>- cd catkin_ws
+- rosdep install -y --from-paths src --ignore-src --rosdistro kinetic -r --os=debian:stretch
+</code></pre><h3 id="6-编译工作空间（容易出错，修改编译使用核心）"><a href="#6-编译工作空间（容易出错，修改编译使用核心）" class="headerlink" title="6.编译工作空间（容易出错，修改编译使用核心）"></a>6.编译工作空间（容易出错，修改编译使用核心）</h3><pre><code>- sudo ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/kinetic -j2
+- source /opt/ros/kinetic/setup.bash
+- echo &quot;source /opt/ros/kinetic/setup.bash&quot; &gt;&gt; ~/.bashrc
+</code></pre><h3 id="7-添加其他额外包（容易出错）"><a href="#7-添加其他额外包（容易出错）" class="headerlink" title="7.添加其他额外包（容易出错）"></a>7.添加其他额外包（容易出错）</h3><pre><code>- cd catkin_ws
+比如安装rosserial串口依赖包
+- rosinstall_generator rosserial --rosdistro kinetic --deps --wet-only --tar &gt; kinetic-custom_ros.rosinstall
+- wstool merge -t src kinetic-custom_ros.rosinstall
+- wstool update -t src
+- rosdep install --from-paths src --ignore-src --rosdistro kinetic -y -r --os=debian:jessie
+- sudo ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/kinetic
+</code></pre><h2 id="ubuntu版本安装（简单）"><a href="#ubuntu版本安装（简单）" class="headerlink" title="ubuntu版本安装（简单）"></a>ubuntu版本安装（简单）</h2><p><a href="http://wiki.ros.org/kinetic/Installation/Ubuntu" target="_blank" rel="noopener">Ubuntu install of ROS Kinetic</a></p>
+<h3 id="1-设置sources"><a href="#1-设置sources" class="headerlink" title="1.设置sources"></a>1.设置sources</h3><pre><code>- sudo sh -c &apos;echo &quot;deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&apos;
+- sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+- sudo apt-get update
+</code></pre><h3 id="2-安转核心或者桌面版"><a href="#2-安转核心或者桌面版" class="headerlink" title="2.安转核心或者桌面版"></a>2.安转核心或者桌面版</h3><pre><code>核心版
+- sudo apt-get install ros-kinetic-ros-base
+桌面版
+- sudo apt-get install ros-kinetic-desktop-full
+</code></pre><h3 id="3-初始化设置环境"><a href="#3-初始化设置环境" class="headerlink" title="3.初始化设置环境"></a>3.初始化设置环境</h3><pre><code>- sudo rosdep init
+- rosdep init
+- echo &quot;source /opt/ros/kinetic/setup.bash&quot; &gt;&gt; ~/.bashrc
+- source ~/.bashrc
+</code></pre><h3 id="4-安转额外包"><a href="#4-安转额外包" class="headerlink" title="4.安转额外包"></a>4.安转额外包</h3><pre><code>- sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog.github.io/tags/ROS-Ubuntu/" rel="tag"># ROS,Ubuntu</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog.github.io/2018/10/31/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-2/" rel="prev" title="ROS开发（二）——添加传感器话题(姿态传感器)">
+                ROS开发（二）——添加传感器话题(姿态传感器) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/blog.github.io/images/avatar.gif" alt="ShiSanChuan">
+          <p class="site-author-name" itemprop="name">ShiSanChuan</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/blog.github.io/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#在树莓派3B-debian系统上编译安装ROS-Kinetic版本"><span class="nav-number">1.</span> <span class="nav-text">在树莓派3B+ debian系统上编译安装ROS Kinetic版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-设置仓库"><span class="nav-number">1.1.</span> <span class="nav-text">1.设置仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装部分依赖包"><span class="nav-number">1.2.</span> <span class="nav-text">2.安装部分依赖包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-建立代码空间安转ROS核心"><span class="nav-number">1.3.</span> <span class="nav-text">3.建立代码空间安转ROS核心</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-解决ROS包依赖"><span class="nav-number">1.4.</span> <span class="nav-text">4.解决ROS包依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-解决rosdep依赖"><span class="nav-number">1.5.</span> <span class="nav-text">5.解决rosdep依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-编译工作空间（容易出错，修改编译使用核心）"><span class="nav-number">1.6.</span> <span class="nav-text">6.编译工作空间（容易出错，修改编译使用核心）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-添加其他额外包（容易出错）"><span class="nav-number">1.7.</span> <span class="nav-text">7.添加其他额外包（容易出错）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ubuntu版本安装（简单）"><span class="nav-number">2.</span> <span class="nav-text">ubuntu版本安装（简单）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-设置sources"><span class="nav-number">2.1.</span> <span class="nav-text">1.设置sources</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安转核心或者桌面版"><span class="nav-number">2.2.</span> <span class="nav-text">2.安转核心或者桌面版</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-初始化设置环境"><span class="nav-number">2.3.</span> <span class="nav-text">3.初始化设置环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-安转额外包"><span class="nav-number">2.4.</span> <span class="nav-text">4.安转额外包</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShiSanChuan</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/blog.github.io/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog.github.io/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/blog.github.io/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

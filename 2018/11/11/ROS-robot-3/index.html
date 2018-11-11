@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/blog.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog.github.io/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="ROS,ubuntu,raspberry,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/blog.github.io/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="这是一个将压力传感器的电阻信息值，经电阻转电压模块，在经Nano模拟量采样，作为i2c从单元读取">
+<meta name="keywords" content="ROS,ubuntu,raspberry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ROS开发（二）——添加传感器话题(压力传感器)">
+<meta property="og:url" content="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-3/index.html">
+<meta property="og:site_name" content="13号下午茶">
+<meta property="og:description" content="这是一个将压力传感器的电阻信息值，经电阻转电压模块，在经Nano模拟量采样，作为i2c从单元读取">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-11T12:41:41.245Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ROS开发（二）——添加传感器话题(压力传感器)">
+<meta name="twitter:description" content="这是一个将压力传感器的电阻信息值，经电阻转电压模块，在经Nano模拟量采样，作为i2c从单元读取">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog.github.io/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shisanchuan.github.io/blog.github.io/2018/11/11/ROS-robot-3/">
+
+
+
+
+
+  <title>ROS开发（二）——添加传感器话题(压力传感器) | 13号下午茶</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog.github.io/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">13号下午茶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">记录研究生学习</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog.github.io/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog.github.io/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://shisanchuan.github.io/blog.github.io/blog.github.io/2018/11/11/ROS-robot-3/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="ShiSanChuan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="13号下午茶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ROS开发（二）——添加传感器话题(压力传感器)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-11T16:39:42+08:00">
+                2018-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是一个将压力传感器的电阻信息值，经电阻转电压模块，在经Nano模拟量采样，作为i2c从单元读取<br><a id="more"></a></p>
+<h2 id="足底压力传感器"><a href="#足底压力传感器" class="headerlink" title="足底压力传感器"></a>足底压力传感器</h2><h3 id="1-关于传感器"><a href="#1-关于传感器" class="headerlink" title="1.关于传感器"></a>1.关于传感器</h3><h4 id="1-1-传感器参数"><a href="#1-1-传感器参数" class="headerlink" title="1.1 传感器参数"></a>1.1 传感器参数</h4><table>
+<thead>
+<tr>
+<th>初始电阻值</th>
+<th>迟滞性</th>
+<th>漂移</th>
+<th>工作温度</th>
+<th>反应时间</th>
+<th>工作电压</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20M</td>
+<td>&lt;10%</td>
+<td>&lt;10%</td>
+<td>-60~60</td>
+<td>&lt;5msec</td>
+<td>3.5~5V</td>
+</tr>
+</tbody>
+</table>
+<p>pic</p>
+<h4 id="1-2-压力转电压传感器-RFP-ZH-参数"><a href="#1-2-压力转电压传感器-RFP-ZH-参数" class="headerlink" title="1.2 压力转电压传感器(RFP-ZH)参数"></a>1.2 压力转电压传感器(RFP-ZH)参数</h4><table>
+<thead>
+<tr>
+<th>工作电压</th>
+<th>模拟口输出电压</th>
+<th>元器件精度</th>
+<th>测量范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.3~5V</td>
+<td>0~5V</td>
+<td>1%</td>
+<td>20kg</td>
+</tr>
+</tbody>
+</table>
+<p>ｐｉｃ</p>
+<h4 id="1-3-arduino-Nano-模拟采集转i2c通信"><a href="#1-3-arduino-Nano-模拟采集转i2c通信" class="headerlink" title="1.3 arduino Nano 模拟采集转i2c通信"></a>1.3 arduino Nano 模拟采集转i2c通信</h4><p>因为树莓派ARM版上没有足够模拟采集口，因此通过Arduino Nano 开发板的６个模拟采集口读取单个所需薄膜压力传感器转为压力后的数据，在将Arduino Nano作为i2c从设备地址分别设为0x07,0x08，将数据分为高位和低位共１２个数据单元。<br><a href="/code/arduinoi2cslave.ino">Arduino Nano 程序</a><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SCL A5</span></span><br><span class="line"><span class="comment">// SDA A4</span></span><br><span class="line"><span class="comment">// A0~3 read analog input</span></span><br><span class="line"><span class="comment">// 共12个uint_8数据，高低位为一组数据，共有6组 20181022</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Wire.h&gt;</span></span></span><br><span class="line"><span class="keyword">uint8_t</span> i2cData[<span class="number">13</span>];<span class="comment">//高低位一组</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin0=A0;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin1=A1;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin2=A2;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin3=A3;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin4=A6;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> analogInPin5=A7;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> i=<span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setup</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Wire.begin(<span class="number">0x08</span>);</span><br><span class="line">  pinMode(LED_BUILTIN, OUTPUT);</span><br><span class="line">  Wire.onReceive(receiveEvent);</span><br><span class="line">  Wire.onRequest(requestEvent);</span><br><span class="line">  Serial.begin(<span class="number">115200</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">receiveEvent</span><span class="params">(<span class="keyword">int</span> howMany)</span></span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span> &lt; Wire.available()) &#123; <span class="comment">// loop through all but the last</span></span><br><span class="line">    <span class="keyword">char</span> c = Wire.read(); <span class="comment">// receive byte as a character</span></span><br><span class="line">    Serial.print(c);         <span class="comment">// print the character</span></span><br><span class="line">  &#125;</span><br><span class="line">  Serial.println(<span class="string">"i am 0x08"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">requestEvent</span><span class="params">()</span></span>&#123;</span><br><span class="line">  digitalWrite(LED_BUILTIN, HIGH);</span><br><span class="line">  Wire.write(i2cData[i]);</span><br><span class="line">  Serial.println(i2cData[i]);</span><br><span class="line">  i++;</span><br><span class="line">  <span class="keyword">if</span>(i==<span class="number">12</span>)i=<span class="number">0</span>;</span><br><span class="line">  digitalWrite(LED_BUILTIN, LOW);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// put your main code here, to run repeatedly:</span></span><br><span class="line">  <span class="keyword">if</span>(i==<span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor0=analogRead(analogInPin0);</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor1=analogRead(analogInPin1);</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor2=analogRead(analogInPin2);</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor3=analogRead(analogInPin3);</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor4=analogRead(analogInPin4);</span><br><span class="line">    <span class="keyword">uint16_t</span> sensor5=analogRead(analogInPin5);</span><br><span class="line">    i2cData[<span class="number">0</span>]=(sensor0&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">1</span>]=(sensor0)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">2</span>]=(sensor1&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">3</span>]=(sensor1)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">4</span>]=(sensor2&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">5</span>]=(sensor2)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">6</span>]=(sensor3&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">7</span>]=(sensor3)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">8</span>]=(sensor4&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">9</span>]=(sensor4)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">10</span>]=(sensor5&gt;&gt;<span class="number">8</span>)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">11</span>]=(sensor5)&amp;<span class="number">0xff</span>;</span><br><span class="line">    i2cData[<span class="number">12</span>]=<span class="string">'\0'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  delay(<span class="number">5</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-编写发布话题数据包"><a href="#2-编写发布话题数据包" class="headerlink" title="2.编写发布话题数据包"></a>2.编写发布话题数据包</h3><h4 id="2-1-安装WiringPi"><a href="#2-1-安装WiringPi" class="headerlink" title="2.1 安装WiringPi"></a>2.1 安装WiringPi</h4><p>WiringPi是在ARM平台上GPIO操作库，能调用i2c,spi等资源,在树莓派上调用</p>
+<pre><code>- sudo apt-get install git-core
+- git clone git://git.drogon.net/wiringPi
+- cd wiringPi
+- ./build
+</code></pre><p>尝试安装是否成功</p>
+<pre><code>- gpio -V
+</code></pre><h4 id="2-2-编写FindWiringPi-cmake文件"><a href="#2-2-编写FindWiringPi-cmake文件" class="headerlink" title="2.2 编写FindWiringPi.cmake文件"></a>2.2 编写FindWiringPi.cmake文件</h4><p>该文件是编写CMake文件时用于索引WiringPi库的文件，存放在<code>/opt/cmake-3.12.1/Modules</code>文件夹中，新建该文件</p>
+<pre><code>- vim FindWiringPi.cmake
+</code></pre><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">find_library</span>(WIRINGPI_LIBRARIES NAMES wiringPi)</span><br><span class="line"><span class="keyword">find_path</span>(WIRINGPI_INCLUDE_DIRS NAMES wiringPi.h)</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(FindPackageHandleStandardArgs)</span><br><span class="line">find_package_handle_standard_args(wiringPi DEFAULT_MSG WIRINGPI_LIBRARIES WIRINGPI_INCLUDE_DIRS)</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-创建press-sensor包"><a href="#2-3-创建press-sensor包" class="headerlink" title="2.3 创建press_sensor包"></a>2.3 创建press_sensor包</h4><pre><code>-  roscreate-pkg press_sensor roscpp
+</code></pre><h4 id="2-4-编写CMakeLists-txt文件"><a href="#2-4-编写CMakeLists-txt文件" class="headerlink" title="2.4 编写CMakeLists.txt文件"></a>2.4 编写CMakeLists.txt文件</h4><p>编译时链接WiringPi库<br><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">2.8</span>.<span class="number">3</span>)</span><br><span class="line"><span class="keyword">project</span>(press_sensor)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_compile_options</span>(-std=c++<span class="number">11</span>)</span><br><span class="line"><span class="keyword">find_package</span>(catkin REQUIRED COMPONENTS</span><br><span class="line">  roscpp</span><br><span class="line">  std_msgs</span><br><span class="line">  sensor_msgs</span><br><span class="line">)</span><br><span class="line"><span class="keyword">find_package</span>(WiringPi REQUIRED)</span><br><span class="line"></span><br><span class="line">catkin_package(</span><br><span class="line"><span class="comment">#  INCLUDE_DIRS include</span></span><br><span class="line"><span class="comment">#  LIBRARIES press_sensor</span></span><br><span class="line"> CATKIN_DEPENDS roscpp std_msgs  sensor_msgs</span><br><span class="line"><span class="comment">#  DEPENDS system_lib</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_directories</span>(</span><br><span class="line">  <span class="keyword">include</span></span><br><span class="line">  <span class="variable">$&#123;catkin_INCLUDE_DIRS&#125;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">add_executable</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node src/press_sensor_node.cpp src/motor.cpp)</span><br><span class="line"><span class="keyword">target_link_libraries</span>(<span class="variable">$&#123;PROJECT_NAME&#125;</span>_node</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">  <span class="variable">$&#123;WIRINGPI_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-5-修改package-xml"><a href="#2-5-修改package-xml" class="headerlink" title="2.5 修改package.xml"></a>2.5 修改package.xml</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">package</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>press_sensor<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span>The press_sensor package<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">maintainer</span> <span class="attr">email</span>=<span class="string">"shisanchuan@todo.todo"</span>&gt;</span>shisanchuan<span class="tag">&lt;/<span class="name">maintainer</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">license</span>&gt;</span>TODO<span class="tag">&lt;/<span class="name">license</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">buildtool_depend</span>&gt;</span>catkin<span class="tag">&lt;/<span class="name">buildtool_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>roscpp<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>std_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">run_depend</span>&gt;</span>sensor_msgs<span class="tag">&lt;/<span class="name">run_depend</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- The export tag contains other, unspecified, tags --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">export</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Other tools can request additional information be placed here --&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;/<span class="name">export</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-6-编写press-sensor-node-cpp文件"><a href="#2-6-编写press-sensor-node-cpp文件" class="headerlink" title="2.6 编写press_sensor_node.cpp文件"></a>2.6 编写press_sensor_node.cpp文件</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;std_msgs/Empty.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sensor_msgs/JointState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ros/ros.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;wiringPiI2C.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;wiringPi.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>  *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> right_address;</span><br><span class="line">	<span class="keyword">int</span> left_address;</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">string</span> NodeHandle_name;</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">string</span> pub_name;</span><br><span class="line">	ros::init(argc, argv, <span class="string">"press_sensor"</span>);</span><br><span class="line">	ros::<span class="function">NodeHandle <span class="title">private_node_handle</span><span class="params">(<span class="string">"~"</span>)</span></span>;</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"righr_address"</span>,right_address,<span class="number">0x07</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="keyword">int</span>&gt;(<span class="string">"left_address"</span>,left_address,<span class="number">0x08</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"NodeHandle_name"</span>,NodeHandle_name,<span class="string">"right"</span>);</span><br><span class="line">	private_node_handle.param&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"pub_name"</span>,pub_name,<span class="string">"data"</span>);</span><br><span class="line">	ros::<span class="function">NodeHandle <span class="title">n</span><span class="params">(NodeHandle_name)</span></span>;</span><br><span class="line">	ros::Publisher pub = n.advertise&lt;sensor_msgs::JointState&gt;(pub_name, <span class="number">1000</span>);</span><br><span class="line">	ros::<span class="function">Rate <span class="title">loop_rate</span><span class="params">(<span class="number">50</span>)</span></span>;</span><br><span class="line">	sensor_msgs::JointState press_sensor;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> right=wiringPiI2CSetup(right_address&amp;<span class="number">0xff</span>);</span><br><span class="line">	<span class="keyword">int</span> left=wiringPiI2CSetup(left_address&amp;<span class="number">0xff</span>);</span><br><span class="line">	<span class="keyword">if</span>(<span class="number">-1</span>==right||<span class="number">-1</span>==left)&#123;</span><br><span class="line">		ROS_ERROR_STREAM(<span class="string">"I2C open fail!!"</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">while</span>(ros::ok())&#123;</span><br><span class="line">		press_sensor.header.stamp=ros::Time::now();</span><br><span class="line">		press_sensor.name.resize(<span class="number">12</span>);</span><br><span class="line">		press_sensor.position.resize(<span class="number">12</span>);</span><br><span class="line">		<span class="keyword">int</span> i=<span class="number">0</span>;</span><br><span class="line">		<span class="keyword">for</span>(;i&lt;<span class="number">6</span>;i++)&#123;</span><br><span class="line">			<span class="keyword">int</span> high=wiringPiI2CRead(right);</span><br><span class="line">			<span class="keyword">int</span> low=wiringPiI2CRead(right);</span><br><span class="line">			ROS_INFO_STREAM(<span class="string">"high is "</span>&lt;&lt;<span class="built_in">std</span>::hex&lt;&lt;high&lt;&lt;<span class="string">"\t"</span>&lt;&lt;<span class="string">"low is"</span>&lt;&lt;<span class="built_in">std</span>::hex&lt;&lt;low);</span><br><span class="line">			press_sensor.name[i]=<span class="built_in">std</span>::to_string(i+<span class="number">1</span>);</span><br><span class="line">			press_sensor.position[i]=<span class="keyword">int</span>(((high&amp;<span class="number">0xff</span>)&lt;&lt;<span class="number">8</span>)|low&amp;<span class="number">0xff</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">for</span>(;i&lt;<span class="number">12</span>;i++)&#123;</span><br><span class="line">			<span class="keyword">int</span> high=wiringPiI2CRead(right);</span><br><span class="line">			<span class="keyword">int</span> low=wiringPiI2CRead(right);</span><br><span class="line">			ROS_INFO_STREAM(<span class="string">"high is "</span>&lt;&lt;<span class="built_in">std</span>::hex&lt;&lt;high&lt;&lt;<span class="string">"\t"</span>&lt;&lt;<span class="string">"low is"</span>&lt;&lt;<span class="built_in">std</span>::hex&lt;&lt;low);</span><br><span class="line">			press_sensor.name[i]=<span class="built_in">std</span>::to_string(i+<span class="number">1</span>);</span><br><span class="line">			press_sensor.position[i]=<span class="keyword">int</span>(((high&amp;<span class="number">0xff</span>)&lt;&lt;<span class="number">8</span>)|low&amp;<span class="number">0xff</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		pub.publish(press_sensor);</span><br><span class="line">		ros::spinOnce();</span><br><span class="line">		loop_rate.sleep();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-7-编写launch文件"><a href="#2-7-编写launch文件" class="headerlink" title="2.7 编写launch文件"></a>2.7 编写launch文件</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">launch</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"press_sensor"</span> <span class="attr">type</span>=<span class="string">"press_sensor_node"</span> <span class="attr">name</span>=<span class="string">"press"</span> <span class="attr">required</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"right_address"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"7"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"left_address"</span> <span class="attr">type</span>=<span class="string">"int"</span>  <span class="attr">value</span>=<span class="string">"8"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"NodeHandle_name"</span> <span class="attr">value</span>=<span class="string">"press"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"pub_name"</span> <span class="attr">value</span>=<span class="string">"data"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">launch</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog.github.io/tags/ROS-ubuntu-raspberry/" rel="tag"># ROS,ubuntu,raspberry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-2/" rel="next" title="ROS开发（二）——添加传感器话题(姿态传感器)">
+                <i class="fa fa-chevron-left"></i> ROS开发（二）——添加传感器话题(姿态传感器)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/ROS-robot-4/" rel="prev" title="ROS开发（二）——添加电机驱动话题(电机驱动)">
+                ROS开发（二）——添加电机驱动话题(电机驱动) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/blog.github.io/images/avatar.gif" alt="ShiSanChuan">
+          <p class="site-author-name" itemprop="name">ShiSanChuan</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/blog.github.io/archives/">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#足底压力传感器"><span class="nav-number">1.</span> <span class="nav-text">足底压力传感器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-关于传感器"><span class="nav-number">1.1.</span> <span class="nav-text">1.关于传感器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-传感器参数"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1 传感器参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-压力转电压传感器-RFP-ZH-参数"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2 压力转电压传感器(RFP-ZH)参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-arduino-Nano-模拟采集转i2c通信"><span class="nav-number">1.1.3.</span> <span class="nav-text">1.3 arduino Nano 模拟采集转i2c通信</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编写发布话题数据包"><span class="nav-number">1.2.</span> <span class="nav-text">2.编写发布话题数据包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-安装WiringPi"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 安装WiringPi</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-编写FindWiringPi-cmake文件"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 编写FindWiringPi.cmake文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-创建press-sensor包"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 创建press_sensor包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-编写CMakeLists-txt文件"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 编写CMakeLists.txt文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-修改package-xml"><span class="nav-number">1.2.5.</span> <span class="nav-text">2.5 修改package.xml</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6-编写press-sensor-node-cpp文件"><span class="nav-number">1.2.6.</span> <span class="nav-text">2.6 编写press_sensor_node.cpp文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-7-编写launch文件"><span class="nav-number">1.2.7.</span> <span class="nav-text">2.7 编写launch文件</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ShiSanChuan</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/blog.github.io/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog.github.io/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/blog.github.io/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog.github.io/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
