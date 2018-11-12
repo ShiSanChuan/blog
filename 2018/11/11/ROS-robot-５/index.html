@@ -102,7 +102,7 @@
 <meta property="og:site_name" content="13号下午茶">
 <meta property="og:description" content="这是一个将两个运行ROS话题服务的树莓派信息连接起来的教程，一个树莓派启用热点wifi，两个树莓派间通过网线通信，连接热点wifi可得到传感器和驱动信息">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-11T13:13:04.849Z">
+<meta property="og:updated_time" content="2018-11-12T13:38:12.448Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ROS开发（三）——搭建平台">
 <meta name="twitter:description" content="这是一个将两个运行ROS话题服务的树莓派信息连接起来的教程，一个树莓派启用热点wifi，两个树莓派间通过网线通信，连接热点wifi可得到传感器和驱动信息">
@@ -331,6 +331,60 @@
 
       
         <p>这是一个将两个运行ROS话题服务的树莓派信息连接起来的教程，一个树莓派启用热点wifi，两个树莓派间通过网线通信，连接热点wifi可得到传感器和驱动信息<br><a id="more"></a></p>
+<h2 id="roscore与话题"><a href="#roscore与话题" class="headerlink" title="roscore与话题"></a>roscore与话题</h2><ul>
+<li>roscore是运行在主服务上的线程，其他topic和server通过主服务上进行相互连接，因此在ubuntu或者debian系统上必须统一ROS_MASTER_URI服务地址</li>
+<li>常用的一些调试协助软件包括<code>rviz</code>（可视化）、<code>rqt_topic</code>、<code>rqt_plot</code>、<code>rqt_graph</code>等</li>
+<li>关于话题数据结构在官网<a href="http://wiki.ros.org/rosmsg" target="_blank" rel="noopener">Wiki</a>中，或者通过rosmsg显示调用，或者<a href="http://wiki.ros.org/ROS/Tutorials/CreatingMsgAndSrv" target="_blank" rel="noopener">自定义消息类型</a></li>
+</ul>
+<h3 id="1-将树莓派Wifi作为热点"><a href="#1-将树莓派Wifi作为热点" class="headerlink" title="1. 将树莓派Wifi作为热点"></a>1. 将树莓派Wifi作为热点</h3><ul>
+<li>安装软件<ul>
+<li>sudo apt-get install hostapd dnsmasq</li>
+</ul>
+</li>
+<li><p>编辑<code>/etc/dnsmasq.conf</code>文件，添加</p>
+<pre><code>- interface=wlan0
+- dhcp-range=10.0.0.2,10.0.0.5,255.255.255.0,12h
+</code></pre></li>
+<li><p>新建<code>/etc/hostapd/hostapd.conf</code>，添加</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">interface=wlan0</span><br><span class="line">hw_mode=g</span><br><span class="line">channel=<span class="number">10</span></span><br><span class="line">auth_algs=<span class="number">1</span></span><br><span class="line">wpa=<span class="number">2</span></span><br><span class="line">wpa_key_mgmt=WPA-PSK</span><br><span class="line">wpa_pairwise=CCMP</span><br><span class="line">rsn_pairwise=CCMP</span><br><span class="line">wpa_passphrase=wifi密码</span><br><span class="line">ssid=wifi名字</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改<code>/etc/sysctl.conf</code> ,更改<br>  net.ipv4.ip_forward=1</p>
+</li>
+<li>添加脚本到<code>/etc/rc.local</code><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ifconfig wlan0 down</span><br><span class="line">ifconfig wlan0 <span class="number">10.0</span>.<span class="number">0.1</span> netmask <span class="number">255.255</span>.<span class="number">255.0</span> up</span><br><span class="line">iwconfig wlan0 power off</span><br><span class="line">service dnsmasq restart</span><br><span class="line">hostapd -B /etc/hostapd/hostapd.conf &amp; &gt; /dev/null <span class="number">2</span>&gt;&amp;<span class="number">1</span>sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  </span><br><span class="line">sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT  </span><br><span class="line">sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="2-两块树莓派通过网线桥连"><a href="#2-两块树莓派通过网线桥连" class="headerlink" title="2. 两块树莓派通过网线桥连"></a>2. 两块树莓派通过网线桥连</h3><h3 id="2-1主机配置"><a href="#2-1主机配置" class="headerlink" title="2.1主机配置"></a>2.1主机配置</h3><ul>
+<li><p>为了保证通信效果，采用两根网线连接两个主控树莓派<br>由于主机的wifi用于作为热点，因此按照网上将<code>/etc/network/interfaces</code>文件修改有线连接地址是不可行的，因为在启动时，会执行该文件，但文件内没有wifi连接配置信息，因此只能在启用热点wifi时用一个<code>interfaces.d</code>文件，启动后重新修改该文件,再通过<code>ifdown</code>、<code>ifup</code>重新修改有线配置</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#iface eth0 inet static</span></span><br><span class="line"><span class="comment">#	address 192.168.50.1</span></span><br><span class="line"><span class="comment">#	netmask 255.255.255.0</span></span><br><span class="line"><span class="comment">#	gateway 192.168.50.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过复制的方式覆盖原文件，但启动后替换文件再启用有线</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cp /etc/network/interfaces.unnormal.bak /etc/network/interfaces</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">ifdown eth0 &amp;</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">ifup   eth0 &amp;</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">cp /etc/network/interfaces.normal.bak /etc/network/interfaces</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>添加进<code>/etc/rc.local</code>文件末尾 </p>
+<h3 id="2-2-从机配置"><a href="#2-2-从机配置" class="headerlink" title="2.2　从机配置"></a>2.2　从机配置</h3></li>
+<li><p>从机需要保证与主机通信同样的配置<code>/etc/network/interfaces</code></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">iface eth0 inet static</span><br><span class="line">	address <span class="number">192.168</span>.<span class="number">50.2</span></span><br><span class="line">	netmask <span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line">	gateway <span class="number">192.168</span>.<span class="number">50.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在<code>/etc/rc.local</code>中添加配置有线设置</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ifdown eth0 </span><br><span class="line">sleep <span class="number">2</span></span><br><span class="line">ifup	eth0 </span><br><span class="line">sleep <span class="number">2</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="3-编写启动脚本"><a href="#3-编写启动脚本" class="headerlink" title="3. 编写启动脚本"></a>3. 编写启动脚本</h3><p>为了保证启动时能正常运行，在启动时配置脚本</p>
+<ul>
+<li><p>主机添加ROS启动项<code>setup.sh</code>脚本</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /bin/bash</span></span><br><span class="line">rm -rf /root/.ros/log</span><br><span class="line">source /opt/ros/kinetic/setup.bash</span><br><span class="line">roscore &amp;</span><br><span class="line">sleep <span class="number">5</span></span><br><span class="line">source /home/pi/catkin_ws/devel/setup.bash</span><br><span class="line">roslaunch /home/pi/catkin_ws/src/press_sensor/launch/demo.launch &amp;</span><br><span class="line">sleep <span class="number">5</span></span><br><span class="line">roslaunch /home/pi/catkin_ws/src/uart_read/launch/demo.launch &amp;</span><br><span class="line"></span><br><span class="line">cp /etc/network/interfaces.unnormal.bak /etc/network/interfaces</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">ifdown eth0 &amp;</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">ifup   eth0 &amp;</span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line">cp /etc/network/interfaces.normal.bak /etc/network/interfaces</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>从机添加脚本<br>由于从机必须先验证是否能ping同主机，才能保证能获得主机roscore的消息</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /bin/bash</span></span><br><span class="line">sleep <span class="number">10</span></span><br><span class="line">flag=<span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> [ <span class="string">"<span class="variable">$flag</span>"</span> != <span class="number">1</span> ];<span class="keyword">do</span></span><br><span class="line">	<span class="keyword">if</span> ping -c <span class="number">1</span> <span class="number">192.168</span>.<span class="number">50.1</span> &gt;/dev/null <span class="number">2</span>&gt;&amp;<span class="number">1</span>;then</span><br><span class="line">		flag=<span class="number">1</span></span><br><span class="line">	<span class="keyword">else</span>	flag=<span class="number">0</span></span><br><span class="line">	fi</span><br><span class="line">done</span><br><span class="line">source /opt/ros/kinetic/setup.bash</span><br><span class="line">source /home/pi/ros_catkin_ws/devel/setup.bash</span><br><span class="line">export ROS_MASTER_URI=http://<span class="number">192.168</span>.<span class="number">50.1</span>:<span class="number">11311</span></span><br><span class="line">sleep <span class="number">5</span></span><br><span class="line">roslaunch /home/pi/ros_catkin_ws/src/uart_read/launch/demo.launch &amp;</span><br><span class="line">sleep <span class="number">2</span></span><br><span class="line">roslaunch /home/pi/ros_catkin_ws/src/motor_control/launch/demo.launch &amp;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>或者主机通过命令启动从机程序</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/sh</span></span><br><span class="line">flag=<span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> [ <span class="string">"<span class="variable">$flag</span>"</span> != <span class="number">1</span> ];<span class="keyword">do</span></span><br><span class="line">	<span class="keyword">if</span> ping -c <span class="number">1</span> <span class="number">192.168</span>.<span class="number">50.2</span> &gt;/dev/null <span class="number">2</span>&gt;&amp;<span class="number">1</span> ; then</span><br><span class="line">		flag=<span class="number">1</span></span><br><span class="line">	<span class="keyword">else</span>	flag=<span class="number">0</span></span><br><span class="line">	fi</span><br><span class="line">done</span><br><span class="line"><span class="comment">#echo "yes"</span></span><br><span class="line">ssh pi@<span class="number">192.168</span>.<span class="number">50.2</span> <span class="string">'bash -s'</span> &lt; setpi2.sh</span><br><span class="line">echo <span class="string">"hello"</span></span><br><span class="line"><span class="keyword">exit</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>setpi2.sh为一个ssh远程脚本的命令</p>
+<ul>
+<li>sudo -s source /home/pi/setup.sh</li>
+</ul>
 
       
     </div>
@@ -370,6 +424,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog.github.io/2018/11/11/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -421,8 +479,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image" src="/blog.github.io/images/avatar.gif" alt="ShiSanChuan">
           <p class="site-author-name" itemprop="name">ShiSanChuan</p>
@@ -435,7 +502,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/blog.github.io/archives/">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -448,7 +515,7 @@
             
             <div class="site-state-item site-state-tags">
               
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               
             </div>
@@ -473,6 +540,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#roscore与话题"><span class="nav-number">1.</span> <span class="nav-text">roscore与话题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-将树莓派Wifi作为热点"><span class="nav-number">1.1.</span> <span class="nav-text">1. 将树莓派Wifi作为热点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-两块树莓派通过网线桥连"><span class="nav-number">1.2.</span> <span class="nav-text">2. 两块树莓派通过网线桥连</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1主机配置"><span class="nav-number">1.3.</span> <span class="nav-text">2.1主机配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-从机配置"><span class="nav-number">1.4.</span> <span class="nav-text">2.2　从机配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-编写启动脚本"><span class="nav-number">1.5.</span> <span class="nav-text">3. 编写启动脚本</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
