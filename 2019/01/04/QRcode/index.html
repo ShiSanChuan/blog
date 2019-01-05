@@ -102,12 +102,13 @@
 <meta property="og:site_name" content="13号下午茶">
 <meta property="og:description" content="前几天看了二维码生成和解码记录下，二维码作为现在替代网址输入方式的工具，在客户端中使用非常多，主要是将一段URL转化为一张正方形黑白相间的图片，通过对方扫描图面再转化为URL。本质上是一种信息编码解码工具。其中比较成熟的工具库包括：qrencode用于将一段字符转为二维码，zbar用于将二维码转为一段字符。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://shisanchuan.github.io/blog.github.io/2019/01/04/QRcode/encode.png">
 <meta property="og:image" content="https://shisanchuan.github.io/blog.github.io/2019/01/04/QRcode/helloworld_qrencode.jpg">
-<meta property="og:updated_time" content="2019-01-05T02:22:50.794Z">
+<meta property="og:updated_time" content="2019-01-05T02:28:10.596Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="二维码编码与解码">
 <meta name="twitter:description" content="前几天看了二维码生成和解码记录下，二维码作为现在替代网址输入方式的工具，在客户端中使用非常多，主要是将一段URL转化为一张正方形黑白相间的图片，通过对方扫描图面再转化为URL。本质上是一种信息编码解码工具。其中比较成熟的工具库包括：qrencode用于将一段字符转为二维码，zbar用于将二维码转为一段字符。">
-<meta name="twitter:image" content="https://shisanchuan.github.io/blog.github.io/2019/01/04/QRcode/helloworld_qrencode.jpg">
+<meta name="twitter:image" content="https://shisanchuan.github.io/blog.github.io/2019/01/04/QRcode/encode.png">
 
 
 
@@ -340,6 +341,7 @@
 <li>二维码数据中有数据码和纠正码，字符会通过本身Ascll码转化为二进制编码排序，按８bits一组，纠错码用于纠错和补全全部编码量，纠错编码通过查表可以得到</li>
 <li>最终编码，由于字符即使通过数据码和纠正码转化，也是一行二进制数据，而二维码是二维数据，此时通过codewords重新将二进制数据<a href="https://www.cnblogs.com/alantu2018/p/8504373.html" target="_blank" rel="noopener">重新排位</a></li>
 </ul>
+<p><img src="/blog.github.io/2019/01/04/QRcode/encode.png" alt="">)</p>
 <h2 id="2-二维码编码库qrencode"><a href="#2-二维码编码库qrencode" class="headerlink" title="2.二维码编码库qrencode"></a>2.二维码编码库qrencode</h2><h3 id="2-1安装"><a href="#2-1安装" class="headerlink" title="2.1安装"></a>2.1安装</h3><ul>
 <li>ubuntu下　<code>sudo apt-get install libqrencode libqrencode-dev</code></li>
 <li>ubutnu 下编译下载：<a href="https://fukuchi.org/works/qrencode/" target="_blank" rel="noopener">qrencode-4.0.2.tar.gz</a><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf qrencode-4.0.2.tar.gz</span><br><span class="line">cd qrencode-4.0.2.tar.gz</span><br><span class="line">sudo apt-get install autoconf automake libtool libpng12-dev autotools-dev</span><br><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
